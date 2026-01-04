@@ -6,7 +6,7 @@ import type { Project, Task } from "@/lib/types"
 
 export function useProjects() {
    const {
-    data = [] as Project[],
+    data = [],
     isLoading,
     error,
    }  = useQuery<Project[]>({
