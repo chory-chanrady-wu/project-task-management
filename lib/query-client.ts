@@ -10,6 +10,7 @@ export const queryClient = new QueryClient({
 })
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 
@@ -18,3 +19,8 @@ export const queryClient = new QueryClient({
 
 =======
 >>>>>>> chanrady
+=======
+
+
+
+>>>>>>> bunleng

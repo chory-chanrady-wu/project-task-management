@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react";
 
 import { fetchProjects, fetchTasks } from "@/lib/api";
@@ -45,4 +46,11 @@ export default async function DashboardPage() {
       </div>
     </main>
   );
+=======
+export default function DashboardPage() {
+return (
+        <div></div>
+    
+);
+>>>>>>> bunleng
 }
