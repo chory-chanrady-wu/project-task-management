@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 
 export default function ProjectsList() {
+  
   const { data: projects = [], isLoading, error } = useProjects();
 
   if (isLoading) {
