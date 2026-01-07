@@ -61,11 +61,9 @@ export function TableContent({
 
 
 
-
-
     return (
-        <div className="rounded-md h-[80vh] overflow-hidden">
-            <div className="overflow-x-auto h-[80vh]">
+        <div className="rounded-md overflow-hidden">
+            <div className="overflow-x-auto h-full">
                 {
                     filteredTasks.length > 0 && (
                         <Table className="w-full">
