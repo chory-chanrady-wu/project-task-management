@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:3001"
+const API_BASE_URL = "https://json-api-self-server.vercel.app"
 
 export async function fetchProjects() {
   const response = await fetch(`${API_BASE_URL}/projects`)
