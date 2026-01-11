@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DueDate } from "./DueDate";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Selector } from "./Selector";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { Separator } from "@/components/ui/separator";
@@ -20,8 +20,22 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Paperclip, Plus } from "lucide-react";
+import { Paperclip } from "lucide-react";
 import Link from "next/link";
+import { useProjects, useCreateTask } from "@/hooks/use-queries";
+import { useRouter } from "next/navigation";
+import { z } from "zod";
+
+const taskSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  projectId: z.string().min(1, "Please select a project"),
+  tags: z.array(z.string()).optional(),
+  assignee: z.string().optional(),
+  dueDate: z.string().optional(),
+});
+
+type TaskFormData = z.infer<typeof taskSchema>;
 
 const presetOptions = {
   status: [
@@ -65,6 +79,7 @@ const data = [
     title: "UX",
     value: "ux",
   },
+  { title: "Other", value: "other" },
 ];
 const assigneesData = [
   {
@@ -85,15 +100,92 @@ const assigneesData = [
   },
 ];
 export function CreateNewTask() {
+  const { data: projects, isLoading: projectsLoading } = useProjects();
+  const createTaskMutation = useCreateTask();
+  const router = useRouter();
+  const projectsData =
+    projects?.map((project) => ({
+      title: project.name,
+      value: project.id,
+    })) || [];
   const [toggleActive, setToggleActive] = useState<
     "done" | "todo" | "in-progress"
   >("in-progress");
   const [togglePriority, setTogglePriority] = useState<
     "high" | "medium" | "low"
   >("medium");
-  const [toggleSubtask, setToggleSubtask] = useState<"done" | "incomplete">(
-    "incomplete"
-  );
+
+  // Form state
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    projectId: "",
+    tags: [] as string[],
+    assignee: "",
+    dueDate: "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    console.log("Form submitted with data:", formData);
+    console.log("Toggle states:", { toggleActive, togglePriority });
+
+    if (!formData.title.trim()) {
+      alert("Title is required");
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      alert("Description is required");
+      return;
+    }
+
+    if (!formData.projectId) {
+      alert("Please select a project");
+      return;
+    }
+
+    const taskData = {
+      title: formData.title,
+      description: formData.description,
+      projectId: formData.projectId,
+      status: toggleActive,
+      priority: togglePriority,
+      dueDate: formData.dueDate,
+      tags: formData.tags,
+      assignee: formData.assignee,
+    };
+
+    console.log("Sending task data:", taskData);
+
+    createTaskMutation.mutate(taskData);
+  };
+
+  // Handle mutation success/error
+  React.useEffect(() => {
+    console.log("Mutation state:", {
+      isSuccess: createTaskMutation.isSuccess,
+      isError: createTaskMutation.isError,
+      error: createTaskMutation.error,
+      data: createTaskMutation.data,
+    });
+
+    if (createTaskMutation.isSuccess) {
+      alert("Task created successfully!");
+      router.push("/tasks");
+    }
+    if (createTaskMutation.isError) {
+      console.error("Failed to create task:", createTaskMutation.error);
+      alert("Failed to create task. Please try again.");
+    }
+  }, [
+    createTaskMutation.isSuccess,
+    createTaskMutation.isError,
+    createTaskMutation.error,
+    createTaskMutation.data,
+    router,
+  ]);
 
   return (
     <Card className="w-full border-none  h-full bg-transparent shadow-none">
@@ -104,11 +196,20 @@ export function CreateNewTask() {
       <Separator className="mb-4" />
       <CardContent>
         <div className="px-4">
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-2">
               <div className="grid gap-2 col-span-1">
-                <Label htmlFor="content">Title</Label>
-                <Input id="content" type="text" placeholder="Title" required />
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  type="text"
+                  placeholder="Title"
+                  required
+                  value={formData.title}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, title: e.target.value }))
+                  }
+                />
               </div>
               <div className="grid gap-2 col-span-1">
                 <Label htmlFor="description">Description</Label>
@@ -117,6 +218,13 @@ export function CreateNewTask() {
                   type="text"
                   placeholder="Description"
                   required
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="col-span-1">
@@ -144,7 +252,29 @@ export function CreateNewTask() {
               </div>
               <div className="col-span-1">
                 {/* Due Date */}
-                <DueDate />
+                <DueDate
+                  value={formData.dueDate}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, dueDate: value }))
+                  }
+                />
+              </div>
+              <div className="flex flex-col col-span-1 gap-2">
+                <Label className="">Project</Label>
+                {/* Select Tags */}
+                {/* <DropdownSelectTags/> */}
+                <Selector
+                  items={projectsLoading ? [] : projectsData}
+                  placeholder={
+                    projectsLoading ? "Loading projects..." : "Select project"
+                  }
+                  selectLabel="Project"
+                  value={formData.projectId}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, projectId: value }))
+                  }
+                  disabled={projectsLoading}
+                />
               </div>
               <div className="flex flex-col col-span-1 gap-2">
                 <Label className="">Tags</Label>
@@ -154,6 +284,13 @@ export function CreateNewTask() {
                   items={data}
                   placeholder="Select tags"
                   selectLabel="Tags"
+                  value={formData.tags[0] || ""}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      tags: value ? [value] : [],
+                    }))
+                  }
                 />
               </div>
               <div className="flex col-span-1 flex-col gap-2">
@@ -164,10 +301,14 @@ export function CreateNewTask() {
                   items={assigneesData}
                   placeholder="Select assignees"
                   selectLabel="Assignee"
+                  value={formData.assignee}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, assignee: value }))
+                  }
                 />
               </div>
 
-              <div className="grid gap-2 col-span-1">
+              <div className="grid gap-2 w-full col-span-2">
                 <Label htmlFor="content">Attachments</Label>
                 <InputGroup className="w-full rounded focus-within:outline-none focus-within:ring-0 focus-within:ring-offset-0">
                   <InputGroupInput
@@ -183,7 +324,7 @@ export function CreateNewTask() {
                 </InputGroup>
               </div>
 
-              <div className="col-span-2">
+              {/* <div className="col-span-2">
                 <Label htmlFor="content">Subtask</Label>
               </div>
               <div className="grid grid-cols-2 gap-2 col-span-2 p-3 border-x">
@@ -206,24 +347,29 @@ export function CreateNewTask() {
                     />
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
+            <CardFooter className="flex items-baseline justify-around mt-4 mx-120">
+              <Link
+                href={"/tasks"}
+                className="w-50 border p-1 rounded-lg text-center text-white max-w-xl bg-red-700"
+              >
+                Back
+              </Link>
+              <div className="w-50 rounded text-center max-w-xl">
+                <Button
+                  type="submit"
+                  className="w-full bg-green-700  border p-1 rounded-lg text-center text-white"
+                  disabled={createTaskMutation.isPending}
+                >
+                  {createTaskMutation.isPending ? "Creating..." : "Submit"}
+                </Button>
+              </div>
+            </CardFooter>
           </form>
         </div>
       </CardContent>
       <Separator className="mb-4" />
-      <CardFooter className="flex-col gap-2">
-        <Button type="submit" className="w-full max-w-xl">
-          Submit
-        </Button>
-
-        <Link
-          href={"/tasks"}
-          className="w-full border rounded p-1 text-center max-w-xl"
-        >
-          Back
-        </Link>
-      </CardFooter>
     </Card>
   );
 }
