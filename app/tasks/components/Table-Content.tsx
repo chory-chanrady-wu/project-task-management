@@ -127,8 +127,8 @@ export function TableContent({ tasks = [], status, search }: TaskProps) {
                           task.status === "done"
                             ? "bg-green-100 text-green-800"
                             : task.status === "in-progress"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-blue-100 text-blue-800"
                         }`}
                       >
                         <span
@@ -136,8 +136,8 @@ export function TableContent({ tasks = [], status, search }: TaskProps) {
                             task.status === "done"
                               ? "bg-green-500"
                               : task.status === "in-progress"
-                              ? "bg-yellow-500"
-                              : "bg-blue-500"
+                                ? "bg-yellow-500"
+                                : "bg-blue-500"
                           }`}
                         ></span>
                         {task.status}
@@ -153,8 +153,8 @@ export function TableContent({ tasks = [], status, search }: TaskProps) {
                           task.priority === "high"
                             ? "bg-green-100 text-green-800"
                             : task.priority === "medium"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-blue-100 text-blue-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-blue-100 text-blue-800"
                         }`}
                       >
                         <span
@@ -162,8 +162,8 @@ export function TableContent({ tasks = [], status, search }: TaskProps) {
                             task.priority === "high"
                               ? "bg-green-500"
                               : task.priority === "medium"
-                              ? "bg-yellow-500"
-                              : "bg-blue-500"
+                                ? "bg-yellow-500"
+                                : "bg-blue-500"
                           }`}
                         ></span>
                         {task.priority}

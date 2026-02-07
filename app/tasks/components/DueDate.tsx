@@ -35,10 +35,10 @@ export function DueDate({
 }) {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(
-    externalValue || "In 2 days"
+    externalValue || "In 2 days",
   );
   const [date, setDate] = React.useState<Date | undefined>(
-    parseDate(inputValue) || undefined
+    parseDate(inputValue) || undefined,
   );
   const [month, setMonth] = React.useState<Date | undefined>(date);
 

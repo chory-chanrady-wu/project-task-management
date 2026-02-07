@@ -73,11 +73,11 @@ export function useCreateTask() {
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
-    return useMutation({
+  return useMutation({
     mutationFn: api.deleteTask,
     onSuccess: () => {
       // Invalidate and refetch tasks
-        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
   });
 }

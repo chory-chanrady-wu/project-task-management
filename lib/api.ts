@@ -33,7 +33,7 @@ export async function fetchTasksByProject(projectId: string) {
 }
 
 export async function createTask(
-  taskData: Omit<Task, "id" | "subtasks" | "comments">
+  taskData: Omit<Task, "id" | "subtasks" | "comments">,
 ) {
   const response = await fetch(`${API_BASE_URL}/tasks`, {
     method: "POST",
